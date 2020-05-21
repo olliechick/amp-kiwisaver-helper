@@ -123,6 +123,10 @@
           }
         }
       }
-    }},
-  "defaultProject": "amp-kiwisaver-helper"
+    }
+  },
+  "defaultProject": "amp-kiwisaver-helper",
+  "cli": {
+    "analytics": "2f0cd407-029c-45a5-85b3-43a4ac05267c"
+  }
 }
