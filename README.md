@@ -11,7 +11,7 @@ If your KiwiSaver is with AMP, they can generate a report which includes your co
 
 The only way to get that information is to email them and ask for it, but that gets tiresome (although it is a good way to double-check).
 
-I created this Angular project that creates a CSV of just the contributions that count towards the $1,042.86.
+I created this Angular project that creates a CSV of only the contributions that count towards the $1,042.86.
 
 ## Instructions
 
