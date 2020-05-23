@@ -1,0 +1,42 @@
+<h2>Premise</h2> <!-- This premise is duplicated in the readme -->
+<p>
+  The New Zealand Government will pay 50 cents for every dollar that you contribute to your KiwiSaver, up to $521.43 per
+  year. So to take full advantage of this, you want to contribute at least $1,042.86 each year. This is calculated over
+  the period 1 July–31 June.
+  See <a href="https://www.kiwisaver.govt.nz/new/benefits/mtc/" target="_blank">kiwisaver.govt.nz/new/benefits/mtc</a>
+  for more details.
+</p>
+<p>
+  If your KiwiSaver is with AMP, they can generate a report which includes your contributions for an arbitrary date
+  range as a CSV, but they don't give you a total for the contributions that count towards the $1,042.86.
+  The only way to get that information is to email them at
+  <a href="mailto:kiwisaver@amp.co.nz" target="_blank">kiwisaver@amp.co.nz</a>
+  and ask for it, but that gets tiresome (although it is a good
+  way to double-check).
+</p>
+<p>
+  I created this website that creates a CSV of only the contributions that count towards the $1,042.86.
+</p>
+
+<h2>Instructions</h2>
+<p>
+  Download the CSV from AMP (log in → Accounts → AMP KiwiSaver Scheme → Transactions) from 1 July to the current date.
+</p>
+<p>
+  On this website, select the "Upload CSV file" button and select the CSV file.
+  The transactions will then be displayed. To download them, select the "Download CSV file" button.
+  The total amount contributed will be displayed, as well as how much you have left to contribute (if any).
+</p>
+
+<h2>What contributions count?</h2>
+<p>
+  Currently, only the following contributions count. (Are there more?
+  <a href="mailto:olliechick@gmail.com?subject=AMP KiwiSaver helper website" target="_blank">Please email me!</a>)
+</p>
+<table mat-table [dataSource]="validLines" class="mat-elevation-z8">
+  <mat-text-column name="Description"></mat-text-column>
+  <mat-text-column name="Account"></mat-text-column>
+
+  <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+  <tr mat-row *matRowDef="let row; columns:columnsToDisplay;"></tr>
+</table>
