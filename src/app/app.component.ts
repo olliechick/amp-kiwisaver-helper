@@ -1,5 +1,7 @@
 import {Component} from '@angular/core';
 import {saveAs} from 'file-saver';
+import {MatDialog} from '@angular/material/dialog';
+import {HelpComponent} from './help/help.component';
 
 @Component({
   selector: 'app-root',
@@ -35,6 +37,9 @@ export class AppComponent {
 
   get totalIsEnough() {
     return this.total >= AppComponent.TOTAL_NEEDED;
+  }
+
+  constructor(public dialog: MatDialog) {
   }
 
   static getHeaderArray(csvRecordsArr: any) {
@@ -206,5 +211,9 @@ export class AppComponent {
 
     const blob = new Blob([csvArray], {type: 'text/csv'});
     saveAs(blob, AppComponent.OUTPUT_FILENAME);
+  }
+
+  openHelp() {
+    this.dialog.open(HelpComponent);
   }
 }
