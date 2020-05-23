@@ -8,6 +8,11 @@ import {saveAs} from 'file-saver';
 })
 export class AppComponent {
   static OUTPUT_FILENAME = 'KiwiSaver transactions.csv';
+  static VALID_LINES = [
+    {Description: 'Regular Contribution', Account: 'Direct Debits and Additional Contributions'},
+    {Description: 'Transfer Out', Account: 'Direct Debits and Additional Contributions'},
+    {Description: 'Regular Contribution', Account: 'Member Contribution'}
+  ];
 
   file: File = null;
   records: any = null;
@@ -129,7 +134,18 @@ export class AppComponent {
   }
 
   static lineCountsForGovtContributions(line: any) {
-    return true;
+    for (const validLine of this.VALID_LINES) {
+      let lineMatchesValidLines = true;
+      for (const key of Object.keys(validLine)) {
+        if (line[key] !== validLine[key]) {
+          lineMatchesValidLines = false;
+        }
+      }
+      if (lineMatchesValidLines) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private static removeNonGovtContributionLines(lines: any) {
@@ -151,7 +167,9 @@ export class AppComponent {
     reader.onload = () => {
       const csvArray = AppComponent.csvToArray(reader.result);
       this.records = AppComponent.csvArrayToModels(csvArray);
+      console.log(this.records);
       this.records = AppComponent.removeNonGovtContributionLines(this.records);
+      console.log(this.records);
       AppComponent.downloadFile(this.records);
     };
 
