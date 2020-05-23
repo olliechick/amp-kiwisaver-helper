@@ -8,13 +8,13 @@
     Upload CSV file
   </button>
 
-  <button mat-raised-button color="accent" (click)="downloadCsv()">
+  <button mat-raised-button color="accent" (click)="downloadCsv()" [disabled]="records == null">
     <mat-icon aria-hidden="true">file_download</mat-icon>
     Download CSV file
   </button>
 </div>
 
-<table mat-table [dataSource]="records" class="mat-elevation-z8">
+<table mat-table [dataSource]="records" class="mat-elevation-z8" *ngIf="records != null">
   <mat-text-column name="EffectiveDate"></mat-text-column>
   <mat-text-column name="Description"></mat-text-column>
   <mat-text-column name="Option"></mat-text-column>
