@@ -21,6 +21,7 @@
     <mat-chip>Member contributions: ${{memberContributionsTotal | number : '1.2-2'}}</mat-chip>
     <mat-chip selected [color]="totalIsEnough ? 'primary' : 'warn'">Total: ${{total | number : '1.2-2'}}</mat-chip>
     <mat-chip selected *ngIf="!totalIsEnough">Left to get: ${{leftToGet | number : '1.2-2'}}</mat-chip>
+    <mat-chip selected *ngIf="totalIsEnough">✅ You've contributed enough!</mat-chip>
   </mat-chip-list>
 
   <button mat-icon-button color="accent" aria-label="Help" (click)="openHelp()">
