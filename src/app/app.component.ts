@@ -8,15 +8,34 @@ import {saveAs} from 'file-saver';
 })
 export class AppComponent {
   static OUTPUT_FILENAME = 'KiwiSaver transactions.csv';
+  static ACCOUNT_DIRECT_DEBITS = 'Direct Debits and Additional Contributions';
+  static ACCOUNT_MEMBER_CONTRIBUTIONS = 'Member Contribution';
+  static DESCRIPTION_REGULAR_CONTRIBUTION = 'Regular Contribution';
+  static DESCRIPTION_TRANSFER_OUT = 'Transfer Out';
   static VALID_LINES = [
-    {Description: 'Regular Contribution', Account: 'Direct Debits and Additional Contributions'},
-    {Description: 'Transfer Out', Account: 'Direct Debits and Additional Contributions'},
-    {Description: 'Regular Contribution', Account: 'Member Contribution'}
+    {Description: AppComponent.DESCRIPTION_REGULAR_CONTRIBUTION, Account: AppComponent.ACCOUNT_DIRECT_DEBITS},
+    {Description: AppComponent.DESCRIPTION_TRANSFER_OUT, Account: AppComponent.ACCOUNT_DIRECT_DEBITS},
+    {Description: AppComponent.DESCRIPTION_REGULAR_CONTRIBUTION, Account: AppComponent.ACCOUNT_MEMBER_CONTRIBUTIONS}
   ];
+  static TOTAL_NEEDED = 1042.86;
 
   file: File = null;
   records: any = null;
   columnsToDisplay = ['EffectiveDate', 'Description', 'Option', 'Account', 'Units', 'UnitPrice', 'Amount'];
+  directDebitTotal = 0;
+  memberContributionsTotal = 0;
+
+  get total() {
+    return this.directDebitTotal + this.memberContributionsTotal;
+  }
+
+  get leftToGet() {
+    return AppComponent.TOTAL_NEEDED - this.total;
+  }
+
+  get totalIsEnough() {
+    return this.total >= AppComponent.TOTAL_NEEDED;
+  }
 
   static getHeaderArray(csvRecordsArr: any) {
     const headers = (csvRecordsArr[0] as string).split(',');
@@ -149,6 +168,19 @@ export class AppComponent {
     return outputLines;
   }
 
+  updateTotals() {
+    this.directDebitTotal = 0;
+    this.memberContributionsTotal = 0;
+
+    for (const line of this.records) {
+      if (line.Account === AppComponent.ACCOUNT_DIRECT_DEBITS) {
+        this.directDebitTotal += Number(line.Amount);
+      } else if (line.Account === AppComponent.ACCOUNT_MEMBER_CONTRIBUTIONS) {
+        this.memberContributionsTotal += Number(line.Amount);
+      }
+    }
+  }
+
   uploadCsv($event: any): void {
     const input = $event.target;
     const reader = new FileReader();
@@ -157,9 +189,8 @@ export class AppComponent {
     reader.onload = () => {
       const csvArray = AppComponent.csvToArray(reader.result);
       this.records = AppComponent.csvArrayToModels(csvArray);
-      console.log(this.records);
       this.records = AppComponent.removeNonGovtContributionLines(this.records);
-      console.log(this.records);
+      this.updateTotals();
     };
 
     reader.onerror = () => console.log('Error occurred while reading CSV.');

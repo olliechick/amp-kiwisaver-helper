@@ -12,6 +12,13 @@
     <mat-icon aria-hidden="true">file_download</mat-icon>
     Download CSV file
   </button>
+
+  <mat-chip-list *ngIf="records != null">
+    <mat-chip>Direct debits: ${{directDebitTotal | number : '1.2-2'}}</mat-chip>
+    <mat-chip>Member contributions: ${{memberContributionsTotal | number : '1.2-2'}}</mat-chip>
+    <mat-chip selected [color]="totalIsEnough ? 'primary' : 'warn'">Total: ${{total | number : '1.2-2'}}</mat-chip>
+    <mat-chip selected *ngIf="!totalIsEnough">Left to get: ${{leftToGet | number : '1.2-2'}}</mat-chip>
+  </mat-chip-list>
 </div>
 
 <table mat-table [dataSource]="records" class="mat-elevation-z8" *ngIf="records != null">
