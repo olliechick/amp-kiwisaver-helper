@@ -1,8 +1,13 @@
 <h1>AMP KiwiSaver helper</h1>
 
-<input #csvInput hidden type="file" onclick="this.value=null" (change)="processCsv($event)"
+<input #csvInput hidden type="file" onclick="this.value=null" (change)="uploadCsv($event)"
        accept=".csv"/>
 <button mat-raised-button color="accent" (click)="csvInput.click()">
   <mat-icon aria-hidden="true">file_upload</mat-icon>
-  Select CSV file
+  Upload CSV file
+</button>
+
+<button mat-raised-button color="accent" (click)="downloadCsv()">
+  <mat-icon aria-hidden="true">file_download</mat-icon>
+  Download CSV file
 </button>

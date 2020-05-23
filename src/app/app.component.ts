@@ -26,17 +26,6 @@ export class AppComponent {
     return headerArray;
   }
 
-  static downloadFile(data: any) {
-    const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
-    const header = Object.keys(data[0]);
-    const csv = data.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','));
-    csv.unshift(header.join(','));
-    const csvArray = csv.join('\r\n');
-
-    const blob = new Blob([csvArray], {type: 'text/csv'});
-    saveAs(blob, AppComponent.OUTPUT_FILENAME);
-  }
-
   // From https://stackoverflow.com/a/1293163/8355496
   static csvToArray(strData) {
     const strDelimiter = ',';
@@ -159,7 +148,7 @@ export class AppComponent {
     return outputLines;
   }
 
-  processCsv($event: any): void {
+  uploadCsv($event: any): void {
     const input = $event.target;
     const reader = new FileReader();
     reader.readAsText(input.files[0]);
@@ -170,9 +159,20 @@ export class AppComponent {
       console.log(this.records);
       this.records = AppComponent.removeNonGovtContributionLines(this.records);
       console.log(this.records);
-      AppComponent.downloadFile(this.records);
     };
 
     reader.onerror = () => console.log('Error occurred while reading CSV.');
+  }
+
+  downloadCsv() {
+    const data = this.records;
+    const replacer = (key, value) => value === null ? '' : value; // specify how you want to handle null values here
+    const header = Object.keys(data[0]);
+    const csv = data.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','));
+    csv.unshift(header.join(','));
+    const csvArray = csv.join('\r\n');
+
+    const blob = new Blob([csvArray], {type: 'text/csv'});
+    saveAs(blob, AppComponent.OUTPUT_FILENAME);
   }
 }
