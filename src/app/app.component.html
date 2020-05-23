@@ -1,13 +1,28 @@
 <h1>AMP KiwiSaver helper</h1>
 
-<input #csvInput hidden type="file" onclick="this.value=null" (change)="uploadCsv($event)"
-       accept=".csv"/>
-<button mat-raised-button color="accent" (click)="csvInput.click()">
-  <mat-icon aria-hidden="true">file_upload</mat-icon>
-  Upload CSV file
-</button>
+<div class="button-bar">
+  <input #csvInput hidden type="file" onclick="this.value=null" (change)="uploadCsv($event)"
+         accept=".csv"/>
+  <button mat-raised-button color="accent" (click)="csvInput.click()">
+    <mat-icon aria-hidden="true">file_upload</mat-icon>
+    Upload CSV file
+  </button>
 
-<button mat-raised-button color="accent" (click)="downloadCsv()">
-  <mat-icon aria-hidden="true">file_download</mat-icon>
-  Download CSV file
-</button>
+  <button mat-raised-button color="accent" (click)="downloadCsv()">
+    <mat-icon aria-hidden="true">file_download</mat-icon>
+    Download CSV file
+  </button>
+</div>
+
+<table mat-table [dataSource]="records" class="mat-elevation-z8">
+  <mat-text-column name="EffectiveDate"></mat-text-column>
+  <mat-text-column name="Description"></mat-text-column>
+  <mat-text-column name="Option"></mat-text-column>
+  <mat-text-column name="Account"></mat-text-column>
+  <mat-text-column name="Units"></mat-text-column>
+  <mat-text-column name="UnitPrice"></mat-text-column>
+  <mat-text-column name="Amount"></mat-text-column>
+
+  <tr mat-header-row *matHeaderRowDef="columnsToDisplay"></tr>
+  <tr mat-row *matRowDef="let row; columns:columnsToDisplay;"></tr>
+</table>

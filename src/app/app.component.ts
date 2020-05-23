@@ -16,6 +16,7 @@ export class AppComponent {
 
   file: File = null;
   records: any = null;
+  columnsToDisplay = ['EffectiveDate', 'Description', 'Option', 'Account', 'Units', 'UnitPrice', 'Amount'];
 
   static getHeaderArray(csvRecordsArr: any) {
     const headers = (csvRecordsArr[0] as string).split(',');
