@@ -32,3 +32,9 @@ The app will automatically reload if you change any of the source files.
 Run `ng build` to build the project.
 The build artifacts will be stored in the `dist/` directory.
 Use the `--prod` flag for a production build.
+
+## Contact
+
+If you have any questions or find any errors, feel free to
+submit a [PR](https://github.com/olliechick/amp-kiwisaver-helper/pulls) or
+[create an issue](https://github.com/olliechick/amp-kiwisaver-helper/issues/new).
