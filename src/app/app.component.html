@@ -3,12 +3,12 @@
 <div class="button-bar">
   <input #csvInput hidden type="file" onclick="this.value=null" (change)="uploadCsv($event)"
          accept=".csv"/>
-  <button mat-raised-button color="accent" (click)="csvInput.click()">
+  <button mat-raised-button color="primary" (click)="csvInput.click()">
     <mat-icon aria-hidden="true">file_upload</mat-icon>
     Upload CSV file
   </button>
 
-  <button mat-raised-button color="accent" (click)="downloadCsv()" [disabled]="records == null">
+  <button mat-raised-button color="primary" (click)="downloadCsv()" [disabled]="records == null">
     <mat-icon aria-hidden="true">file_download</mat-icon>
     Download CSV file
   </button>
