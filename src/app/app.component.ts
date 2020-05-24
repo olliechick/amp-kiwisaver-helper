@@ -214,6 +214,9 @@ export class AppComponent {
   }
 
   openHelp() {
-    this.dialog.open(HelpComponent);
+    this.dialog.open(HelpComponent, {
+      autoFocus: false,
+      maxHeight: '90vh'
+    });
   }
 }
