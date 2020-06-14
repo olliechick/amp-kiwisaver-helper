@@ -1,5 +1,5 @@
 import {Component, OnInit} from '@angular/core';
-import {AppComponent} from '../app.component';
+import {Util} from '../util';
 
 @Component({
   selector: 'app-help',
@@ -12,7 +12,7 @@ export class HelpComponent implements OnInit {
   }
 
   get validLines() {
-    return AppComponent.VALID_LINES;
+    return Util.VALID_LINES;
   }
 
   columnsToDisplay = ['Description', 'Account'];

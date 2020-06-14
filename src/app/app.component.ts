@@ -2,6 +2,7 @@ import {Component} from '@angular/core';
 import {saveAs} from 'file-saver';
 import {MatDialog} from '@angular/material/dialog';
 import {HelpComponent} from './help/help.component';
+import {Util} from './util';
 
 @Component({
   selector: 'app-root',
@@ -10,15 +11,6 @@ import {HelpComponent} from './help/help.component';
 })
 export class AppComponent {
   static OUTPUT_FILENAME = 'KiwiSaver transactions.csv';
-  static ACCOUNT_DIRECT_DEBITS = 'Direct Debits and Additional Contributions';
-  static ACCOUNT_MEMBER_CONTRIBUTIONS = 'Member Contribution';
-  static DESCRIPTION_REGULAR_CONTRIBUTION = 'Regular Contribution';
-  static DESCRIPTION_TRANSFER_OUT = 'Transfer Out';
-  static VALID_LINES = [
-    {Description: AppComponent.DESCRIPTION_REGULAR_CONTRIBUTION, Account: AppComponent.ACCOUNT_DIRECT_DEBITS},
-    {Description: AppComponent.DESCRIPTION_TRANSFER_OUT, Account: AppComponent.ACCOUNT_DIRECT_DEBITS},
-    {Description: AppComponent.DESCRIPTION_REGULAR_CONTRIBUTION, Account: AppComponent.ACCOUNT_MEMBER_CONTRIBUTIONS}
-  ];
   static TOTAL_NEEDED = 1042.86;
 
   file: File = null;
@@ -148,7 +140,7 @@ export class AppComponent {
   }
 
   static lineCountsForGovtContributions(line: any) {
-    for (const validLine of this.VALID_LINES) {
+    for (const validLine of Util.VALID_LINES) {
       let lineMatchesValidLines = true;
       for (const key of Object.keys(validLine)) {
         if (line[key] !== validLine[key]) {
@@ -163,14 +155,7 @@ export class AppComponent {
   }
 
   private static removeNonGovtContributionLines(lines: any) {
-    const outputLines = [];
-
-    for (const line of lines) {
-      if (AppComponent.lineCountsForGovtContributions(line)) {
-        outputLines.push(line);
-      }
-    }
-    return outputLines;
+    return lines.filter(AppComponent.lineCountsForGovtContributions);
   }
 
   updateTotals() {
@@ -178,9 +163,9 @@ export class AppComponent {
     this.memberContributionsTotal = 0;
 
     for (const line of this.records) {
-      if (line.Account === AppComponent.ACCOUNT_DIRECT_DEBITS) {
+      if (line.Account === Util.ACCOUNT_DIRECT_DEBITS) {
         this.directDebitTotal += Number(line.Amount);
-      } else if (line.Account === AppComponent.ACCOUNT_MEMBER_CONTRIBUTIONS) {
+      } else if (line.Account === Util.ACCOUNT_MEMBER_CONTRIBUTIONS) {
         this.memberContributionsTotal += Number(line.Amount);
       }
     }
@@ -194,7 +179,7 @@ export class AppComponent {
     reader.onload = () => {
       const csvArray = AppComponent.csvToArray(reader.result);
       this.records = AppComponent.csvArrayToModels(csvArray);
-      this.records = AppComponent.removeNonGovtContributionLines(this.records);
+      this.records = AppComponent.removeNonGovtContributionLines(this.records).reverse();
       this.updateTotals();
     };
 
