@@ -12,10 +12,27 @@ import {Util} from './util';
 export class AppComponent {
   static OUTPUT_FILENAME = 'KiwiSaver transactions.csv';
   static TOTAL_NEEDED = 1042.86;
+  static MONTH_START = 6; // July
+
+  static EFFECTIVE_DATE_COL = 'EffectiveDate';
+  static DESCRIPTION_COL = 'Description';
+  static OPTION_COL = 'Option';
+  static ACCOUNT_COL = 'Account';
+  static UNITS_COL = 'Units';
+  static UNIT_PRICE_COL = 'UnitPrice';
+  static AMOUNT_COL = 'Amount';
 
   file: File = null;
   records: any = null;
-  columnsToDisplay = ['EffectiveDate', 'Description', 'Option', 'Account', 'Units', 'UnitPrice', 'Amount'];
+  columnsToDisplay = [
+    AppComponent.EFFECTIVE_DATE_COL,
+    AppComponent.DESCRIPTION_COL,
+    AppComponent.OPTION_COL,
+    AppComponent.ACCOUNT_COL,
+    AppComponent.UNITS_COL,
+    AppComponent.UNIT_PRICE_COL,
+    AppComponent.AMOUNT_COL
+  ];
   directDebitTotal = 0;
   memberContributionsTotal = 0;
   loadingDataFromCsv = false;
@@ -155,8 +172,29 @@ export class AppComponent {
     return false;
   }
 
-  private static removeNonGovtContributionLines(lines: any) {
+  private static removeNonGovtContributionLines(lines: any[]) {
     return lines.filter(AppComponent.lineCountsForGovtContributions);
+  }
+
+  private static removeContributionsBefore1July(lines: any[]) {
+
+    let firstJuly = new Date();
+    const today = new Date();
+    if (today.getMonth() < AppComponent.MONTH_START) {
+      firstJuly = new Date(today.getFullYear() - 1, AppComponent.MONTH_START);
+    } else {
+      firstJuly = new Date(today.getFullYear(), AppComponent.MONTH_START);
+    }
+
+    const newLines = [];
+
+    lines.forEach(line => {
+      if (firstJuly.getTime() < Date.parse(line[this.EFFECTIVE_DATE_COL])) {
+        newLines.push(line);
+      }
+    });
+
+    return newLines;
   }
 
   updateTotals() {
@@ -183,6 +221,7 @@ export class AppComponent {
       this.records = AppComponent.csvArrayToModels(csvArray);
       this.loadingDataFromCsv = false;
       this.records = AppComponent.removeNonGovtContributionLines(this.records).reverse();
+      this.records = AppComponent.removeContributionsBefore1July(this.records);
       this.updateTotals();
     };
 
