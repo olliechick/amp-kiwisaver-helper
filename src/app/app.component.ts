@@ -10,6 +10,10 @@ import {Util} from './util';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
+
+  constructor(public dialog: MatDialog) {
+  }
+
   static OUTPUT_FILENAME = 'KiwiSaver transactions.csv';
   static TOTAL_NEEDED = 1042.86;
   static MONTH_START = 6; // July
@@ -26,6 +30,7 @@ export class AppComponent {
 
   file: File = null;
   records: any = null;
+  years: string[] = [];
   columnsToDisplay = [
     AppComponent.EFFECTIVE_DATE_COL,
     AppComponent.DESCRIPTION_COL,
@@ -35,34 +40,10 @@ export class AppComponent {
     AppComponent.UNIT_PRICE_COL,
     AppComponent.AMOUNT_COL
   ];
-  directDebitTotal = 0;
-  memberContributionsTotal = 0;
+  directDebitTotals = {};
+  memberContributionsTotals = {};
   loadingDataFromCsv = false;
   currentYear: string;
-
-  get total() {
-    return this.directDebitTotal + this.memberContributionsTotal;
-  }
-
-  get leftToGet() {
-    return AppComponent.TOTAL_NEEDED - this.total;
-  }
-
-  get totalIsEnough() {
-    return this.total >= AppComponent.TOTAL_NEEDED;
-  }
-
-  constructor(public dialog: MatDialog) {
-  }
-
-  static getHeaderArray(csvRecordsArr: any) {
-    const headers = (csvRecordsArr[0] as string).split(',');
-    const headerArray = [];
-    for (const header of headers) {
-      headerArray.push(header);
-    }
-    return headerArray;
-  }
 
   // From https://stackoverflow.com/a/1293163/8355496
   static csvToArray(strData) {
@@ -179,56 +160,66 @@ export class AppComponent {
     return lines.filter(AppComponent.lineCountsForGovtContributions);
   }
 
-  private static getEndDate() {
-    const today = new Date();
-
-    if (today.getMonth() < AppComponent.MONTH_END) {
-      return new Date(today.getFullYear(), AppComponent.MONTH_END, AppComponent.DAY_END_OF_END_MONTH);
-    } else {
-      return new Date(today.getFullYear() + 1, AppComponent.MONTH_END, AppComponent.DAY_END_OF_END_MONTH);
-    }
-  }
-
-  private static getStartDate() {
-    const today = new Date();
-
-    if (today.getMonth() < AppComponent.MONTH_START) {
-      return new Date(today.getFullYear() - 1, AppComponent.MONTH_START);
-    } else {
-      return new Date(today.getFullYear(), AppComponent.MONTH_START);
-    }
-  }
-
-  private static removeContributionsBeforeStartDate(lines: any[]) {
-    const startDate = this.getStartDate();
-
-    const newLines = [];
+  private static sortIntoYears(lines: any[]) {
+    const records = {};
 
     lines.forEach(line => {
-      if (startDate.getTime() < Date.parse(line[this.EFFECTIVE_DATE_COL])) {
-        newLines.push(line);
+        const startDate = this.getCurrentYear(new Date(Date.parse(line[this.EFFECTIVE_DATE_COL])));
+        if (startDate in records) {
+          records[startDate].push(line);
+        } else {
+          records[startDate] = [line];
+        }
       }
-    });
+    );
 
-    return newLines;
+    return records;
   }
 
-  private static getCurrentYear() {
+  private static getCurrentYear(day = new Date()) {
     const options = {year: 'numeric', month: 'long', day: 'numeric'};
-    const startDate = this.getStartDate();
-    const endDate = this.getEndDate();
-    return startDate.toLocaleDateString('en-NZ', options) + ' - ' + endDate.toLocaleDateString('en-NZ', options);
+    let startDate = null;
+    let endDate = null;
+
+    if (day.getMonth() < AppComponent.MONTH_START) {
+      startDate = new Date(day.getFullYear() - 1, AppComponent.MONTH_START);
+      endDate = new Date(day.getFullYear(), AppComponent.MONTH_END, AppComponent.DAY_END_OF_END_MONTH);
+    } else {
+      startDate = new Date(day.getFullYear(), AppComponent.MONTH_START);
+      endDate = new Date(day.getFullYear() + 1, AppComponent.MONTH_END, AppComponent.DAY_END_OF_END_MONTH);
+    }
+    let currentYear = startDate.toLocaleDateString('en-NZ', options) + ' - ' + endDate.toLocaleDateString('en-NZ', options);
+    if (endDate > new Date()) {
+      currentYear += ' (current year)';
+    }
+    return currentYear;
+  }
+
+  private getTotal(year) {
+    return this.directDebitTotals[year] + this.memberContributionsTotals[year];
+  }
+
+  private getLeftToGet(year) {
+    return AppComponent.TOTAL_NEEDED - this.getTotal(year);
+  }
+
+  private getTotalIsEnough(year) {
+    return this.getTotal(year) >= AppComponent.TOTAL_NEEDED;
   }
 
   updateTotals() {
-    this.directDebitTotal = 0;
-    this.memberContributionsTotal = 0;
+    this.directDebitTotals = [];
+    this.memberContributionsTotals = [];
 
-    for (const line of this.records) {
-      if (line.Account === Util.ACCOUNT_DIRECT_DEBITS) {
-        this.directDebitTotal += Number(line.Amount);
-      } else if (line.Account === Util.ACCOUNT_MEMBER_CONTRIBUTIONS) {
-        this.memberContributionsTotal += Number(line.Amount);
+    for (const year of this.years) {
+      this.directDebitTotals[year] = 0;
+      this.memberContributionsTotals[year] = 0;
+      for (const line of this.records[year]) {
+        if (line.Account === Util.ACCOUNT_DIRECT_DEBITS) {
+          this.directDebitTotals[year] += Number(line.Amount);
+        } else if (line.Account === Util.ACCOUNT_MEMBER_CONTRIBUTIONS) {
+          this.memberContributionsTotals[year] += Number(line.Amount);
+        }
       }
     }
   }
@@ -241,10 +232,11 @@ export class AppComponent {
 
     reader.onload = () => {
       const csvArray = AppComponent.csvToArray(reader.result);
-      this.records = AppComponent.csvArrayToModels(csvArray);
+      let records = AppComponent.csvArrayToModels(csvArray);
+      records = AppComponent.removeNonGovtContributionLines(records).reverse();
+      this.records = AppComponent.sortIntoYears(records);
       this.loadingDataFromCsv = false;
-      this.records = AppComponent.removeNonGovtContributionLines(this.records).reverse();
-      this.records = AppComponent.removeContributionsBeforeStartDate(this.records);
+      this.years = Object.keys(this.records).reverse();
       this.currentYear = AppComponent.getCurrentYear();
       this.updateTotals();
     };
