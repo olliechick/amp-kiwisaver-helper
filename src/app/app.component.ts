@@ -28,6 +28,8 @@ export class AppComponent {
   static UNIT_PRICE_COL = 'UnitPrice';
   static AMOUNT_COL = 'Amount';
 
+  static ACCOUNT_GOVERNMENT_CONTRIBUTIONS = 'Government Contributions';
+
   file: File = null;
   records: any = null;
   years: string[] = [];
@@ -42,6 +44,7 @@ export class AppComponent {
   ];
   directDebitTotals = {};
   memberContributionsTotals = {};
+  govtContributions = {};
   loadingDataFromCsv = false;
   currentYear: string;
 
@@ -160,15 +163,35 @@ export class AppComponent {
     return lines.filter(AppComponent.lineCountsForGovtContributions);
   }
 
+  private static getGovtContributions(lines: any[]) {
+    const govtContributions = {};
+
+    lines.forEach(line => {
+      if (line[this.DESCRIPTION_COL] === Util.DESCRIPTION_REGULAR_CONTRIBUTION
+        && line[this.ACCOUNT_COL] === this.ACCOUNT_GOVERNMENT_CONTRIBUTIONS) {
+        const day = new Date(Date.parse(line[this.EFFECTIVE_DATE_COL]));
+        day.setFullYear(day.getFullYear() - 1); // last year - this is the year the contributions are for
+        const year = this.getCurrentYear(day);
+        if (year in govtContributions) {
+          govtContributions[year] += parseFloat(line[this.AMOUNT_COL]);
+        } else {
+          govtContributions[year] = parseFloat(line[this.AMOUNT_COL]);
+        }
+      }
+    });
+
+    return govtContributions;
+  }
+
   private static sortIntoYears(lines: any[]) {
     const records = {};
 
     lines.forEach(line => {
-        const startDate = this.getCurrentYear(new Date(Date.parse(line[this.EFFECTIVE_DATE_COL])));
-        if (startDate in records) {
-          records[startDate].push(line);
+        const year = this.getCurrentYear(new Date(Date.parse(line[this.EFFECTIVE_DATE_COL])));
+        if (year in records) {
+          records[year].push(line);
         } else {
-          records[startDate] = [line];
+          records[year] = [line];
         }
       }
     );
@@ -195,15 +218,15 @@ export class AppComponent {
     return currentYear;
   }
 
-  private getTotal(year) {
+  getTotal(year) {
     return this.directDebitTotals[year] + this.memberContributionsTotals[year];
   }
 
-  private getLeftToGet(year) {
+  getLeftToGet(year) {
     return AppComponent.TOTAL_NEEDED - this.getTotal(year);
   }
 
-  private getTotalIsEnough(year) {
+  getTotalIsEnough(year) {
     return this.getTotal(year) >= AppComponent.TOTAL_NEEDED;
   }
 
@@ -232,9 +255,9 @@ export class AppComponent {
 
     reader.onload = () => {
       const csvArray = AppComponent.csvToArray(reader.result);
-      let records = AppComponent.csvArrayToModels(csvArray);
-      records = AppComponent.removeNonGovtContributionLines(records).reverse();
-      this.records = AppComponent.sortIntoYears(records);
+      const records = AppComponent.csvArrayToModels(csvArray);
+      this.govtContributions = AppComponent.getGovtContributions(records);
+      this.records = AppComponent.sortIntoYears(AppComponent.removeNonGovtContributionLines(records).reverse());
       this.loadingDataFromCsv = false;
       this.years = Object.keys(this.records).reverse();
       this.currentYear = AppComponent.getCurrentYear();

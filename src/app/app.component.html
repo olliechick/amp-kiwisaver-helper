@@ -32,6 +32,13 @@
         <mat-chip>Total: ${{getTotal(year) | number : '1.2-2'}}</mat-chip>
         <mat-chip *ngIf="!getTotalIsEnough(year)">⚠️ Left to get: ${{getLeftToGet(year) | number : '1.2-2'}}</mat-chip>
         <mat-chip *ngIf="getTotalIsEnough(year)">✅ You've contributed enough!</mat-chip>
+        <mat-chip *ngIf="govtContributions[year]">
+          <ng-container *ngIf="govtContributions[year] > 521.43">🤑</ng-container>
+          <ng-container *ngIf="govtContributions[year] == 521.43">😊</ng-container>
+          <ng-container *ngIf="govtContributions[year] < 521.43 && govtContributions[year] >= 1">🙂</ng-container>
+          <ng-container *ngIf="govtContributions[year] < 1">🙁</ng-container>
+          Government contributed: ${{govtContributions[year]}}
+        </mat-chip>
       </mat-chip-list>
     </div>
 
