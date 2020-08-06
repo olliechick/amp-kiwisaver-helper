@@ -13,6 +13,8 @@ export class AppComponent {
   static OUTPUT_FILENAME = 'KiwiSaver transactions.csv';
   static TOTAL_NEEDED = 1042.86;
   static MONTH_START = 6; // July
+  static MONTH_END = 5; // June
+  static DAY_END_OF_END_MONTH = 30; // 30 June
 
   static EFFECTIVE_DATE_COL = 'EffectiveDate';
   static DESCRIPTION_COL = 'Description';
@@ -36,6 +38,7 @@ export class AppComponent {
   directDebitTotal = 0;
   memberContributionsTotal = 0;
   loadingDataFromCsv = false;
+  currentYear: string;
 
   get total() {
     return this.directDebitTotal + this.memberContributionsTotal;
@@ -176,25 +179,45 @@ export class AppComponent {
     return lines.filter(AppComponent.lineCountsForGovtContributions);
   }
 
-  private static removeContributionsBefore1July(lines: any[]) {
-
-    let firstJuly = new Date();
+  private static getEndDate() {
     const today = new Date();
-    if (today.getMonth() < AppComponent.MONTH_START) {
-      firstJuly = new Date(today.getFullYear() - 1, AppComponent.MONTH_START);
+
+    if (today.getMonth() < AppComponent.MONTH_END) {
+      return new Date(today.getFullYear(), AppComponent.MONTH_END, AppComponent.DAY_END_OF_END_MONTH);
     } else {
-      firstJuly = new Date(today.getFullYear(), AppComponent.MONTH_START);
+      return new Date(today.getFullYear() + 1, AppComponent.MONTH_END, AppComponent.DAY_END_OF_END_MONTH);
     }
+  }
+
+  private static getStartDate() {
+    const today = new Date();
+
+    if (today.getMonth() < AppComponent.MONTH_START) {
+      return new Date(today.getFullYear() - 1, AppComponent.MONTH_START);
+    } else {
+      return new Date(today.getFullYear(), AppComponent.MONTH_START);
+    }
+  }
+
+  private static removeContributionsBeforeStartDate(lines: any[]) {
+    const startDate = this.getStartDate();
 
     const newLines = [];
 
     lines.forEach(line => {
-      if (firstJuly.getTime() < Date.parse(line[this.EFFECTIVE_DATE_COL])) {
+      if (startDate.getTime() < Date.parse(line[this.EFFECTIVE_DATE_COL])) {
         newLines.push(line);
       }
     });
 
     return newLines;
+  }
+
+  private static getCurrentYear() {
+    const options = {year: 'numeric', month: 'long', day: 'numeric'};
+    const startDate = this.getStartDate();
+    const endDate = this.getEndDate();
+    return startDate.toLocaleDateString('en-NZ', options) + ' - ' + endDate.toLocaleDateString('en-NZ', options);
   }
 
   updateTotals() {
@@ -221,7 +244,8 @@ export class AppComponent {
       this.records = AppComponent.csvArrayToModels(csvArray);
       this.loadingDataFromCsv = false;
       this.records = AppComponent.removeNonGovtContributionLines(this.records).reverse();
-      this.records = AppComponent.removeContributionsBefore1July(this.records);
+      this.records = AppComponent.removeContributionsBeforeStartDate(this.records);
+      this.currentYear = AppComponent.getCurrentYear();
       this.updateTotals();
     };
 
