@@ -10,6 +10,7 @@ import {MatChipsModule} from '@angular/material/chips';
 import {HelpComponent} from './help/help.component';
 import {MatDialogModule} from '@angular/material/dialog';
 import {MatListModule} from '@angular/material/list';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 
 @NgModule({
   declarations: [
@@ -24,7 +25,8 @@ import {MatListModule} from '@angular/material/list';
     MatDialogModule,
     MatTableModule,
     MatChipsModule,
-    MatListModule
+    MatListModule,
+    MatProgressSpinnerModule
   ],
   providers: [],
   bootstrap: [AppComponent]

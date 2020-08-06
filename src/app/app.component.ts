@@ -18,6 +18,7 @@ export class AppComponent {
   columnsToDisplay = ['EffectiveDate', 'Description', 'Option', 'Account', 'Units', 'UnitPrice', 'Amount'];
   directDebitTotal = 0;
   memberContributionsTotal = 0;
+  loadingDataFromCsv = false;
 
   get total() {
     return this.directDebitTotal + this.memberContributionsTotal;
@@ -172,6 +173,7 @@ export class AppComponent {
   }
 
   uploadCsv($event: any): void {
+    this.loadingDataFromCsv = true;
     const input = $event.target;
     const reader = new FileReader();
     reader.readAsText(input.files[0]);
@@ -179,11 +181,15 @@ export class AppComponent {
     reader.onload = () => {
       const csvArray = AppComponent.csvToArray(reader.result);
       this.records = AppComponent.csvArrayToModels(csvArray);
+      this.loadingDataFromCsv = false;
       this.records = AppComponent.removeNonGovtContributionLines(this.records).reverse();
       this.updateTotals();
     };
 
-    reader.onerror = () => console.log('Error occurred while reading CSV.');
+    reader.onerror = () => {
+      this.loadingDataFromCsv = false;
+      console.log('Error occurred while reading CSV.');
+    };
   }
 
   downloadCsv() {
