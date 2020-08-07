@@ -11,7 +11,7 @@
     Upload CSV file
   </button>
 
-  <button mat-raised-button color="primary" (click)="downloadCsv()" [disabled]="records == null">
+  <button mat-raised-button color="primary" (click)="downloadCsv()" [disabled]="records == null || recordsIsEmpty">
     <mat-icon aria-hidden="true">file_download</mat-icon>
     Download CSV file
   </button>
@@ -20,6 +20,10 @@
     <mat-icon>help</mat-icon>
   </button>
 </div>
+
+<p *ngIf="recordsIsEmpty">
+  No transactions to display. Try exporting a longer date range from AMP (select the help button for more information).
+</p>
 
 <div *ngIf="records">
   <ng-container *ngFor="let year of years">

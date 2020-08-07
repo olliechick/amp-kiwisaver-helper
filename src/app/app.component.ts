@@ -14,6 +14,10 @@ export class AppComponent {
   constructor(public dialog: MatDialog) {
   }
 
+  get recordsIsEmpty() {
+    return this.records !== null && Object.keys(this.records).length === 0;
+  }
+
   static OUTPUT_FILENAME = 'KiwiSaver transactions.csv';
   static TOTAL_NEEDED = 1042.86;
   static MONTH_START = 6; // July
